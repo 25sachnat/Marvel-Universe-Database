@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marvel Universe Core Database</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding-bottom: 40px; color: #333; }
+        .container { max-width: 800px; margin: 40px auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; }
+        h1 { text-transform: uppercase; letter-spacing: 2px; margin-top: 0; color: #111; }
+        p { color: #555; font-size: 18px; line-height: 1.6; margin-bottom: 30px; }
+
+        /* 🌐 GLOBAL NAVIGATION TOP BAR STYLING */
+        .navbar { background: #111; padding: 20px 0; text-align: center; margin-bottom: 30px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-bottom: 3px solid #e62429; }
+        .logo-container { display: inline-flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 15px; }
+        .logo-badge { position: relative; width: 45px; height: 45px; background: linear-gradient(135deg, #e62429, #a64dff); border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; box-shadow: 0 0 15px rgba(230,36,41,0.4); }
+        .logo-text-m { color: #fff; font-size: 24px; font-weight: 900; font-family: 'Impact', Arial, sans-serif; transform: skewX(-5deg); }
+        .logo-title-main { color: #fff; font-family: 'Impact', Arial, sans-serif; font-size: 22px; text-transform: uppercase; letter-spacing: 1px; line-height: 1; transform: skewX(-5deg); text-align: left; }
+        .logo-subtitle { color: #888; font-family: Arial, sans-serif; font-size: 10px; text-transform: uppercase; letter-spacing: 3px; font-weight: bold; margin-top: 2px; text-align: left; }
+        .nav-links a { color: #fff; text-decoration: none; font-weight: bold; margin: 0 20px; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; cursor: pointer; }
+        .nav-links a:hover { color: #e62429; }
+
+        /* 📋 CORE DISPLAY CARD PANEL SYSTEM */
+        .page-panel { display: none; }
+        .page-panel.active { display: block; }
+        .nav-box { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+        .nav-card { display: block; padding: 15px 30px; text-decoration: none; font-weight: bold; border-radius: 6px; text-transform: uppercase; color: white; border: none; cursor: pointer; font-size: 16px; transition: transform 0.2s; }
+        .nav-card:hover { transform: scale(1.05); }
+        .hero-btn { background: #e62429; } .villain-btn { background: #4a154b; } .hq-btn { background: #ff8c00; }
+        /* 📋 DIRECTORY DATA WRAP CARDS & FONTS */
+        .list-container { display: flex; flex-direction: column; max-width: 600px; margin: 0 auto; gap: 20px; text-align: left; }
+        .item-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.06); border-top: 6px solid #ccc; position: relative; }
+        .card-hero-theme { border-top-color: #e62429; } .card-villain-theme { border-top-color: #4a154b; } .card-hq-theme { border-top-color: #ff8c00; }
+        .card-title { font-size: 22px; margin: 0 0 10px 0; font-weight: bold; }
+        .theme-h-color { color: #e62429; } .theme-v-color { color: #4a154b; } .theme-hq-color { color: #ff8c00; }
+        .action-link { display: inline-block; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px; border: none; cursor: pointer; margin-top: 5px; }
+        .back-nav-btn { display: inline-block; margin-bottom: 20px; font-weight: bold; text-decoration: none; cursor: pointer; background: none; border: none; font-size: 16px; padding: 0; }
+
+        /* 🧠 INTERACTIVE TRIVIA EVALUATION WIDGET SPECS */
+        .quiz-card { background: #fff; border: 2px solid #ccc; border-radius: 12px; padding: 30px; text-align: left; max-width: 600px; margin: 30px auto 0 auto; box-shadow: 0 4px 10px rgba(0,0,0,0.04); }
+        .quiz-option { display: block; background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 10px; cursor: pointer; border: 1px solid #ccc; font-weight: bold; }
+        .quiz-option input { margin-right: 10px; }
+        .submit-btn { background: #111; color: white; border: none; padding: 12px 25px; font-weight: bold; border-radius: 5px; cursor: pointer; text-transform: uppercase; font-size: 14px; }
+        .submit-btn:hover { background: #333; }
+        .status-box { padding: 15px; border-radius: 6px; margin-top: 20px; font-weight: bold; border-left: 5px solid; display: none; }
+        .status-box.correct { background: #d4edda; color: #155724; border-left-color: #28a745; }
+        .status-box.incorrect { background: #f8d7da; color: #721c24; border-left-color: #dc3545; }
+    </style>
+</head>
+<body>
+
+    <!-- 🌐 WEB GLOBAL NAVBAR NAVIGATION EMBLEM STRIP -->
+    <div class="navbar">
+        <div class="logo-container">
+            <div class="logo-badge"><span class="logo-text-m">M</span></div>
+            <div>
+                <div class="logo-title-main">MARVEL<span style="color:#e62429;">CORE</span></div>
+                <div class="logo-subtitle">TACTICAL NET DATA</div>
+            </div>
+        </div>
+        <div class="nav-links">
+            <a onclick="showPanel('home-panel')">🏡 Home Hub</a>
+            <a onclick="showPanel('heroes-panel')">🛡️ Heroes</a>
+            <a onclick="showPanel('villains-panel')">😈 Villains</a>
+            <a onclick="showPanel('hq-panel')">🛰️ Headquarters</a>
+        </div>
+    </div>
+    <!-- 🏡 INTERACTIVE MASTER PANEL SECTION: HOME HUBS TERMINAL -->
+    <div id="home-panel" class="page-panel active">
+        <div class="container">
+            <h1>Marvel Universe Core Database</h1>
+            <p>Welcome to the tactical command dashboard terminal. Access alignment indexes or telemetry files directly below.</p>
+            <div class="nav-box">
+                <button onclick="showPanel('heroes-panel')" class="nav-card hero-btn">🛡️ View Heroes</button>
+                <button onclick="showPanel('villains-panel')" class="nav-card villain-btn">😈 Audit Villains</button>
+                <button onclick="showPanel('hq-panel')" class="nav-card hq-btn">🛰️ Scan Bases</button>
+            </div>
+
+            <!-- 🧠 GLOBAL MULTIPLE CHOICE EVALUATION LAYOUT OVERLAY -->
+            <div class="quiz-card">
+                <h3 style="margin-top:0; color:#e62429; text-transform:uppercase; border-bottom:2px solid #eee; padding-bottom:10px;">📋 Core Clearance Assessment Quiz</h3>
+                <p id="quiz-question-text" style="font-size:16px; font-weight:bold; color:#222; margin-bottom:15px;">Loading question telemetry...</p>
+                <form id="trivia-form" onsubmit="verifyQuizAnswer(event)">
+                    <div id="quiz-options-container"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; gap:15px;">
+                        <button type="submit" class="submit-btn">Verify Credentials</button>
+                        <button type="button" onclick="loadNextQuizQuestion()" style="color:#666; background:none; border:none; font-weight:bold; font-size:14px; cursor:pointer;">🔄 Load Different Question</button>
+                    </div>
+                </form>
+                <div id="quiz-status-feedback" class="status-box"></div>
+            </div>
+        </div>
+    </div>
+    <!-- 🛡️ INTERACTIVE PANEL SECTION: HEROES TEAM REGISTRY HUB -->
+    <div id="heroes-panel" class="page-panel">
+        <h1 style="text-align:center; text-transform:uppercase; margin-bottom:30px; color:#e62429;">🛡️ Allied Super-Hero Teams</h1>
+        <div class="list-container">
+            <div class="item-card card-hero-theme">
+                <h3 class="card-title theme-h-color">The Avengers</h3>
+                <button onclick="viewRosterList('avengers')" class="action-link hero-btn">View Roster</button>
+            </div>
+            <div class="item-card card-hero-theme">
+                <h3 class="card-title theme-h-color">The X-Men</h3>
+                <button onclick="viewRosterList('xmen')" class="action-link hero-btn">View Roster</button>
+            </div>
+            <div class="item-card card-hero-theme">
+                <h3 class="card-title theme-h-color">Fantastic Four</h3>
+                <button onclick="viewRosterList('fantasticfour')" class="action-link hero-btn">View Roster</button>
+            </div>
+            <div class="item-card card-hero-theme">
+                <h3 class="card-title theme-h-color">The Thunderbolts</h3>
+                <button onclick="viewRosterList('thunderbolts')" class="action-link hero-btn">View Roster</button>
+            </div>
+            <div class="item-card card-hero-theme">
+                <h3 class="card-title theme-h-color">Independent Heroes</h3>
+                <button onclick="viewRosterList('misc_heroes')" class="action-link hero-btn">View Roster</button>
+            </div>
+        </div>
+    </div>
+    <!-- 😈 INTERACTIVE PANEL SECTION: VILLAINS FACTION REGISTRY HUB -->
+    <div id="villains-panel" class="page-panel">
+        <h1 style="text-align:center; text-transform:uppercase; margin-bottom:30px; color:#4a154b;">😈 Threat Factions & Syndicates</h1>
+        <div class="list-container">
+            <div class="item-card card-villain-theme">
+                <h3 class="card-title theme-v-color">Avengers Villains</h3>
+                <button onclick="viewRosterList('avengers_villains')" class="action-link villain-btn">View Roster</button>
+            </div>
+            <div class="item-card card-villain-theme">
+                <h3 class="card-title theme-v-color">X-Men Villains</h3>
+                <button onclick="viewRosterList('xmen_villains')" class="action-link villain-btn">View Roster</button>
+            </div>
+            <div class="item-card card-villain-theme">
+                <h3 class="card-title theme-v-color">Fantastic 4 Villains</h3>
+                <button onclick="viewRosterList('fantasticfour_villains')" class="action-link villain-btn">View Roster</button>
+            </div>
+            <div class="item-card card-villain-theme">
+                <h3 class="card-title theme-v-color">Guardians Villains</h3>
+                <button onclick="viewRosterList('guardians_villains')" class="action-link villain-btn">View Roster</button>
+            </div>
+            <div class="item-card card-villain-theme">
+                <h3 class="card-title theme-v-color">Thunderbolts Rivals</h3>
+                <button onclick="viewRosterList('thunderbolts_villains')" class="action-link villain-btn">View Roster</button>
+            </div>
+            <div class="item-card card-villain-theme">
+                <h3 class="card-title theme-v-color">Independent Villains</h3>
+                <button onclick="viewRosterList('misc_villains')" class="action-link villain-btn">View Roster</button>
+            </div>
+        </div>
+    </div>
+    <!-- 🛰️ INTERACTIVE PANEL SECTION: HEADQUARTERS HUB CATEGORY TILES -->
+    <div id="hq-panel" class="page-panel">
+        <h1 style="text-align:center; text-transform:uppercase; margin-bottom:30px; color:#ff8c00;">🛰️ Tactical Command Centers</h1>
+        <div style="display:flex; max-width:950px; margin:0 auto; gap:40px; padding:0 20px;">
+            <div style="flex:1; display:flex; flex-direction:column; gap:20px;">
+                <div style="background:white; padding:25px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.06); border-top:6px solid #e62429; text-align:center;">
+                    <h3 style="font-size:24px; color:#e62429; margin-top:0;">Hero Command Centers</h3>
+                    <button onclick="viewHqList('hero_bases')" class="action-link hero-btn" style="padding:12px 25px;">Open Bases Catalog</button>
+                </div>
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:20px;">
+                <div style="background:white; padding:25px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.06); border-top:6px solid #4a154b; text-align:center;">
+                    <h3 style="font-size:24px; color:#4a154b; margin-top:0;">Villain Strongholds</h3>
+                    <button onclick="viewHqList('villain_bases')" class="action-link villain-btn" style="padding:12px 25px;">Open Bases Catalog</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📂 DYNAMIC SUB-ROSTER INTERFACE: TEAMS DETAILED LOGS -->
+    <div id="team-roster-view" class="page-panel" style="max-width:600px; margin:0 auto; padding:0 20px;">
+        <button id="team-back-btn" class="back-nav-btn">&larr; Return to Dashboard</button>
+        <div style="background:white; padding:40px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05); border-top:5px solid #ccc;" id="team-card-wrapper">
+            <h1 id="view-team-name" style="text-transform:uppercase; margin-top:0;">Team Name</h1>
+            <p id="view-team-tagline" style="font-style:italic; color:#666;"></p>
+            <p id="view-team-desc"></p>
+            <h3>Click a profile below to inspect files:</h3>
+            <ul id="view-team-links" style="list-style-type:square; padding-left:20px; line-height:2.2; font-size:18px;"></ul>
+        </div>
+    </div>
+    <!-- 📂 DYNAMIC SUB-ROSTER INTERFACE: HEADQUARTERS FACTION LISTS -->
+    <div id="hq-roster-view" class="page-panel" style="max-width:600px; margin:0 auto; padding:0 20px;">
+        <button onclick="showPanel('hq-panel')" class="back-nav-btn" style="color:#ff8c00;">&larr; Back to Headquarters Categories</button>
+        <div style="background:white; padding:40px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05); border-top:5px solid #ff8c00;">
+            <h1 id="view-hq-group-name" style="color:#ff8c00; text-transform:uppercase; margin-top:0;">Group Name</h1>
+            <p id="view-hq-group-tagline" style="font-style:italic; color:#666;"></p>
+            <p id="view-hq-group-desc"></p>
+            <h3>Select a facility intelligence file below:</h3>
+            <ul id="view-hq-group-links" style="list-style-type:square; padding-left:20px; line-height:2.2; font-size:18px;"></ul>
+        </div>
+    </div>
+
+    <!-- 👤 DYNAMIC INTERACTIVE CONSOLE OVERLAY: CHARACTER BIOGRAPHIES -->
+    <div id="character-profile-view" class="page-panel" style="max-width:500px; margin:0 auto; padding:0 20px;">
+        <button id="char-back-btn" class="back-nav-btn">&larr; Back to Roster List</button>
+        <div style="background:white; padding:40px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05); border-top:5px solid #ccc;" id="char-card-wrapper">
+            <h1 id="view-char-name" style="text-transform:uppercase; margin-top:0;">Character Name</h1>
+            <p style="font-size:16px;"><strong>Real Name:</strong> <span id="view-char-real-name"></span></p>
+            <h3 id="view-char-affiliation-label" style="border-bottom:2px solid #ccc; padding-bottom:5px; color:#333;">🛡️ Affiliation</h3>
+            <p id="view-char-team"></p>
+            <h3 id="view-char-backstory-label" style="border-bottom:2px solid #ccc; padding-bottom:5px; color:#333;">📖 Backstory</h3>
+            <p id="view-char-backstory" style="line-height:1.5;"></p>
+            <h3 id="view-char-powers-label" style="border-bottom:2px solid #ccc; padding-bottom:5px; color:#333;">⚡ Core Powers & Abilities</h3>
+            <p id="view-char-powers"></p>
+        </div>
+    </div>
+    <!-- 🛰️ DYNAMIC INTERACTIVE CONSOLE OVERLAY: HEADQUARTERS TELEMETRY FILES -->
+    <div id="hq-profile-view" class="page-panel" style="max-width:600px; margin:0 auto; padding:0 20px;">
+        <button id="hq-back-btn" class="back-nav-btn" style="color:#ff8c00;">&larr; Back to List</button>
+        <div style="background:white; padding:40px; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.05); border-top:5px solid #ff8c00;">
+            <h1 id="view-hq-name" style="color:#ff8c00; text-transform:uppercase; margin-top:0;">Facility Name</h1>
+            <p style="font-size:16px;"><strong>Operational Location:</strong> <span id="view-hq-real-name"></span></p>
+            <h3 style="color:#333; border-bottom:2px solid #ff8c00; padding-bottom:5px; margin-top:25px;">📡 Facility Classification</h3>
+            <p id="view-hq-group"></p>
+            <h3 style="color:#333; border-bottom:2px solid #ff8c00; padding-bottom:5px; margin-top:25px;">📖 Strategic Backstory</h3>
+            <p id="view-hq-backstory" style="line-height:1.5;"></p>
+            <h3 style="color:#333; border-bottom:2px solid #ff8c00; padding-bottom:5px; margin-top:25px;">⚡ Tech Specs & Security Details</h3>
+            <p id="view-hq-powers"></p>
+        </div>
+    </div>
+
+    <!-- ⚙️ THE WEB CLIENT INTERACTIVE DATABASE ENGINES -->
+    <script>
+        // Master client data dictionary mapping matching your original app profile databases
+        const TEAMS = {
+            "avengers": {
+                "name": "The Avengers", "tagline": "Earth's Mightiest Heroes", "alignment": "hero",
+                "description": "Marvel's premier superhero team comprised of legendary champions united to stop massive global threats.",
+                "members": {
+                    "ironman": {"name": "Iron Man", "real_name": "Tony Stark", "backstory": "Billionaire industrialist Tony Stark built an advanced suit of armor to escape captivity after sustaining a severe wound. He dedicated his fortune and genius intellect to protecting humanity, flying the skies as an armor-clad defender. He now funds and leads the Avengers to neutralize massive global threats.", "powers": "Flight, Repulsor Blasts, Genius Intellect"},
+                    "captainamerica": {"name": "Captain America", "real_name": "Steve Rogers", "backstory": "During WWII, frail Steve Rogers volunteered for a secret research project and was injected with an experimental serum. The process transformed him into the pinnacle of physical perfection, giving him superhuman strength, speed, and endurance. Operating with an indestructible vibranium shield, he woke up from decades in ice to lead the modern Avengers.", "powers": "Peak Physiology, Vibranium Shield, Tactics"},
+                    "thor": {"name": "Thor", "real_name": "Thor Odinson", "backstory": "The powerful Norse God of Thunder was stripped of his divine powers and banished to Earth by his father Odin to learn humility. While trapped among baseline humanity, he learned true compassion and sacrificed his life to save his mortal friends. Regaining his godhood, he now wields his mystic hammer Mjolnir to guard Earth.", "powers": "Weather Control, Strength, Mjolnir Hammer"},
+                    "hulk": {"name": "The Hulk", "real_name": "Bruce Banner", "backstory": "Brilliant nuclear physicist Dr. Bruce Banner was caught in the epicenter of a massive gamma bomb explosion while saving a teenager. The astronomical dose of radiation permanently altered his DNA, creating a secondary personality driven by fear and stress. Whenever anger takes control, he transforms into a raging green behemoth of pure power.", "powers": "Infinite Strength, Invulnerability, Healing"},
+                    "blackwidow": {"name": "Black Widow", "real_name": "Natasha Romanoff", "backstory": "Orphaned at a young age, Natasha Romanoff was trained in the brutal Soviet Red Room academy to become the ultimate shadow assassin. Haunted by her dark past, she defected to S.H.I.E.L.D. when offered a path to redemption instead of execution. She now uses her world-class espionage and martial arts skills to protect the world.", "powers": "Master Martial Artist, Espionage, Gadgets"},
+                    "hawkeye": {"name": "Hawkeye", "real_name": "Clint Barton", "backstory": "Clint Barton ran away from an abusive orphanage and discovered a natural gift for archery while working at a traveling carnival. He trained endlessly to become the world's greatest marksman, catching the attention of secret government agencies who recruited him. Clint relies on absolute focus and high-tech trick arrows to stand side-by-side with gods.", "powers": "Perfect Precision, Custom High-Tech Trick Arrows"},
+                    "scarletwitch": {"name": "Scarlet Witch", "real_name": "Wanda Maximoff", "backstory": "Wanda Maximoff volunteered for dangerous genetic experiments involving cosmic energies to protect her war-torn Eastern European homeland. The exposure unlocked latent magical capabilities deep within her DNA, granting her access to ancient chaos energy. Breaking free from her creators, she mastered Chaos Magic to alter probability and rewrite reality.", "powers": "Chaos Magic, Reality Warping, Energy Blasts"},
+                    "vision": {"name": "Vision", "real_name": "Vision", "backstory": "This advanced synthetic android was originally built out of vibranium tissue by the rogue robot Ultron to serve as his ultimate physical vessel. The Avengers intercepted the cradle and uploaded Tony Stark's personal AI matrix into the frame, bringing it to life with divine lightning. Driven by a cosmic Mind Stone, he chose to defend humanity.", "powers": "Phasing Through Walls, Solar Infrared Beam, Flight"},
+                    "blackpanther": {"name": "Black Panther", "real_name": "T'Challa", "backstory": "Prince T'Challa assumed emergency leadership of the secret, technologically advanced African nation of Wakanda after his father was assassinated. He underwent sacred tribal rituals, consuming a rare heart-shaped herb that linked his spirit to the Panther Goddess Bast. Donning a high-tech woven Vibranium suit, he protects his people as the Black Panther.", "powers": "Enhanced Senses and Agility, Vibranium Combat Suit"},
+                    "antman": {"name": "Ant-Man", "real_name": "Hank Pym", "backstory": "Brilliant biochemist Dr. Hank Pym discovered a rare subatomic particle capable of altering the physical scale of an object while magnifying its force. He built a specialized containment suit to protect his research from military corporations and created a helmet to speak with insects. Using his tech, he helped lay the structural foundation for superhero teams.", "powers": "Size Manipulation, Cybernetic Insect Telepathy Helmet"}
+                }
+            },
+            "fantasticfour": {
+                "name": "The Fantastic Four", "tagline": "The First Family of Marvel", "alignment": "hero",
+                "description": "A close-knit team of scientists mutated by space cosmic rays during a deep space expedition.",
+                "members": {
+                    "mrfantastic": {"name": "Mr. Fantastic", "real_name": "Reed Richards", "backstory": "Prodigy scientist Reed Richards built an experimental starship to explore space anomalies, launching an unauthorized flight with his closest friends. The ship was hit by an unexpected cosmic ray storm, bombarding the crew with high-tier radiation. Reed discovered his cellular structure had become completely elastic, letting him stretch his body into any form.", "powers": "Elastic Body Manipulation, Supreme Intellect, Master Inventor"},
+                    "invisiblewoman": {"name": "Invisible Woman", "real_name": "Sue Storm", "backstory": "Susan Storm was an accomplished scientist and the primary coordinator for Reed Richards' historic, unsanctioned space expedition. When the ship crossed paths with a massive cosmic ray storm, she absorbed an immense payload of high-tier radiation. She awoke to find she could bend light waves to make herself invisible and project psionic force fields.", "powers": "Total Invisibility Generation, Psionic Force Fields"},
+                    "humantorch": {"name": "Human Torch", "real_name": "Johnny Storm", "backstory": "Johnny Storm was a reckless young mechanic who climbed aboard Reed Richards' experimental starship as its chief pilot. When cosmic rays struck the vessel, his body reacted violently to the energy, giving him the ability to engulf himself completely in plasma flame. Adopting the name Human Torch, he can fly at supersonic speeds and controls fire.", "powers": "Fiery Plasma Transmutation, Flight, Pyrokinesis"},
+                    "thing": {"name": "The Thing", "real_name": "Ben Grimm", "backstory": "Ben Grimm was a decorated military test pilot who agreed to pilot his college roommate Reed Richards' experimental spacecraft. The cosmic storm mutated Ben drastically, transforming his skin into a thick, interlocking orange rock hide and expanding his muscles. Despite his gruff exterior and monstrous form, Ben possesses a heart of gold.", "powers": "Superhuman Rock-Hard Durability, Heavy Combat Strength"}
+                }
+            },
+            "xmen": {
+                "name": "The X-Men", "tagline": "The Strangest Super-Heroes of All", "alignment": "hero",
+                "description": "Mutant heroes trained by Professor Xavier to protect a world that fears them.",
+                "members": {
+                    "professorx": {"name": "Professor X", "real_name": "Charles Xavier", "backstory": "Charles Xavier discovered his world-class telepathic powers as a young boy and dedicated his life to genetic research. After a tragic battle left him paralyzed from the waist down, he converted his family mansion into a private boarding school. He secretly uses the academy as a sanctuary to train young mutants to master their gifts safely.", "powers": "World-Class Telepathy, Mind Control"},
+                    "cyclops": {"name": "Cyclops", "real_name": "Scott Summers", "backstory": "As an orphan, Scott Summers suffered head trauma that damaged his ability to control his emerging mutant gifts, causing him to release uncontrollable blasts of raw energy from his eyes. He was rescued by Professor Xavier, who engineered a specialized visor made of ruby-quartz crystals to safely contain the destructive beams.", "powers": "Concussive Force Optic Blasts"},
+                    "wolverine": {"name": "Wolverine", "real_name": "Logan / James Howlett", "backstory": "Born in the 19th century, Logan possesses a rapid cellular healing factor that slows his aging and lets him survive brutal injuries. During the Cold War, he was captured by the military Weapon X program, which forcefully fused his entire skeleton and claws with indestructible Adamantium metal.", "powers": "Healing Factor, Retractable Adamantium Claws"},
+                    "storm": {"name": "Storm", "real_name": "Ororo Munroe", "backstory": "Ororo Munroe was orphaned as a child in Cairo and lived as a street thief before wandering into the plains of the Serengeti. When her mutant abilities manifested, she gained the majestic power to perceive and manipulate global weather patterns, leading local tribes to worship her as a goddess.", "powers": "Atmospheric & Weather Control, Flight"},
+                    "jeangrey": {"name": "Jean Grey", "real_name": "Jean Grey (Marvel Girl)", "backstory": "Jean Grey's immense psychic powers manifested at age ten when she telepathically felt the emotions of her dying best friend, leaving her mind deeply traumatized. Professor Xavier helped block her high-tier telekinetic gifts until she was old enough to manage them safely at his academy.", "powers": "Omega-Level Telekinesis, Advanced Telepathy"},
+                    "beast": {"name": "Beast", "real_name": "Hank McCoy", "backstory": "Hank McCoy was born with unusually large limbs but possessed an incredibly brilliant scientific mind, excelling in biochemistry and genetics at Xavier's academy. Desperate to hide his physical mutations from the public, he engineered an experimental hormonal extract and tested the serum on himself.", "powers": "Superhuman Agility, Genius Mind"},
+                    "rogue": {"name": "Rogue", "real_name": "Anna Marie", "backstory": "Anna Marie discovered her mutant gift during her first romantic kiss, which permanently altered her life. Cursed with the inability to make skin contact without hurting others, she fled her home in terror and was manipulated by radical mutant groups. She eventually approached Professor Xavier for sanctuary.", "powers": "Power Absorption, Near-Invulnerable Flight"},
+                    "gambit": {"name": "Gambit", "real_name": "Remy LeBeau", "backstory": "Remy LeBeau was abandoned at birth due to his glowing red eyes and was raised by the notorious New Orleans Thieves Guild. He grew up as a master thief, using his mutant power to convert an object's potential energy into raw kinetic explosive power. He eventually joined the X-Men.", "powers": "Kinetic Energy Charging, Hypnotic Charm"},
+                    "nightcrawler": {"name": "Nightcrawler", "real_name": "Kurt Wagner", "backstory": "Born in Germany with blue fur and a prehensile tail, Kurt Wagner was abandoned due to his appearance and raised by a circus community. Local villagers eventually mistook him for a demon, forming a violent mob before Professor Xavier intervened. Kurt maintains a deeply gentle, kind spirit.", "powers": "Line-of-Sight Teleportation, Wall-Crawling"},
+                    "kittypryde": {"name": "Shadowcat", "real_name": "Kitty Pryde", "backstory": "Kitty Pryde lived a normal suburban life until age thirteen, when she began suffering from intense migraines and inadvertently phased straight through her bedroom floor. Her unique mutant ability to pass through solid matter caught the attention of Professor Xavier, who recruited her.", "powers": "Intangibility Phasing, Computer Genius"}
+                }
+            },
+            "guardians": {
+                "name": "Guardians of the Galaxy", "tagline": "Outlaws, Misfits, and Defenders of the Cosmos", "alignment": "hero",
+                "description": "A collection of cosmic outlaws, mercenaries, and targets who banded together to preserve peace across deep space.",
+                "members": {
+                    "starlord": {"name": "Star-Lord", "real_name": "Peter Quill", "backstory": "Abducted from Earth by space pirates moments after his mother passed away, Peter Quill was raised in deep space to become an expert thief. Traveling galaxies as a rogue pilot for hire, he was forced to unite a group of eccentric space convicts during a routine cosmic orb heist.", "powers": "Master Cosmic Pilot, Element Gun Weaponry"},
+                    "gamora": {"name": "Gamora", "real_name": "Gamora Zen Whoberi Ben Titan", "backstory": "Gamora was taken as a child by the warlord Thanos, who executed her biological family and brutally trained her to become the perfect living weapon. Secretly harboring a burning hatred for her adoptive father, she defected during an Infinity Stone mission to defend the cosmos.", "powers": "Deadliest Interstellar Assassin, Expert Swordsmanship"},
+                    "drax": {"name": "Drax the Destroyer", "real_name": "Drax", "backstory": "Driven insane by grief after the cosmic fanatic Ronan the Accuser murdered his family, Drax waged a bloody campaign of vengeance across space. Capturing his rage earned him his title before he crossed paths with Peter Quill in a high-security space prison.", "powers": "Superhuman Durability, Berserker Rage Strength"},
+                    "rocket": {"name": "Rocket Raccoon", "real_name": "Subject 89P13", "backstory": "Rocket was originally a normal woodland animal before being abducted by illegal alien geneticists who subjected him to painful cybernetic augmentations. The experiments left him with a highly advanced, genius-level intellect but deep psychological scars.", "powers": "Genius Engineering, Heavy Weaponry Specialist"},
+                    "groot": {"name": "Groot", "real_name": "Groot", "backstory": "Groot is an ancient sentient tree-like organism from Planet X whose dense wood physiology allows him to spontaneously grow limbs and regenerate branches. Due to his unique vocal cords, any sentence he attempts to speak is heard by others as the phrase 'I am Groot'.", "powers": "Wood Regeneration, High Physical Density"}
+                }
+            },
+            "thunderbolts": {
+                "name": "The Thunderbolts", "tagline": "Justice, Like Lightning!", "alignment": "hero",
+                "description": "A government-sanctioned black-ops strike team composed of reformed villains and dangerous antiheroes deployed for high-risk missions.",
+                "members": {
+                    "wintersoldier": {"name": "Winter Soldier", "real_name": "Bucky Barnes", "backstory": "Captain America's WWII ally Bucky Barnes survived a fatal fall only to be captured, upgraded, and brainwashed by Hydra into a lethal assassin. Operating as a mythological shadow agent for decades, he underwent extensive recovery to reclaim his mind.", "powers": "Cybernetic Metal Arm, Super-Soldier Physiology"},
+                    "yelena": {"name": "Yelena Belova", "real_name": "Yelena Belova", "backstory": "Yelena Belova was placed into the brutal Soviet Red Room espionage academy as a toddler, graduating at the top of her class. Armed with a sharp wit, she set out to free other brainwashed widows after breaking her neural conditioning rules.", "powers": "Master Assassin, High-Tech Spy Weaponry"},
+                    "usagent": {"name": "U.S. Agent", "real_name": "John Walker", "backstory": "Decorated military veteran John Walker was chosen to replace Captain America, but the extreme pressure drove him to take a black-market Super-Soldier Serum. The serum amplified his strength but destabilized his emotions, leading to his discharge.", "powers": "Enhanced Strength, Vibranium Star Shield"},
+                    "ghost": {"name": "Ghost", "real_name": "Ava Starr", "backstory": "Ava Starr was caught in a catastrophic quantum explosion as a child that killed her parents and left her own cellular matrix permanently unstable. Her molecules constantly pull apart and reform, allowing her to phase straight through solid matter.", "powers": "Quantum Intangibility, Invisibility, Elite Stealth"},
+                    "redguardian": {"name": "Red Guardian", "real_name": "Alexei Shostakov", "backstory": "During the peak of the Cold War, Alexei Shostakov underwent intense physical manipulation to become Russia's official super-soldier counterpart to Captain America. He spent decades locked away in a remote Siberian prison before joining the team.", "powers": "Enhanced Strength and Endurance, Cold War Training"}
+                }
+            },
+            "misc_heroes": {
+                "name": "Independent Heroes", "tagline": "Solo Defenders and Vigilantes", "alignment": "hero",
+                "description": "Powerful heroes and street-level vigilantes who protect the innocent independently without maintaining fixed team memberships.",
+                "members": {
+                    "spiderman": {"name": "Spider-Man", "real_name": "Peter Parker", "backstory": "Bitten by a radioactive spider on a high school field trip, teenager Peter Parker gained extraordinary arachnid abilities, superhuman agility, and a precognitive Spider-Sense. The tragic loss of his Uncle Ben taught him his life code.", "powers": "Wall-Crawling, Spider-Sense, Web-Shooters"},
+                    "daredevil": {"name": "Daredevil", "real_name": "Matt Murdock", "backstory": "Blinded as a boy by a radioactive chemical spill, Matt Murdock discovered the accident inadvertently enhanced his remaining senses to superhuman levels. By day, he fights systemic injustice as a defense lawyer in Hell's Kitchen.", "powers": "Echolocation Radar Sense, Master Martial Artist"},
+                    "punisher": {"name": "The Punisher", "real_name": "Frank Castle", "backstory": "Frank Castle was an elite Marine Corps veteran who returned home from deployment only to watch his wife and young children get caught in a brutal crossfire. Realizing the legal system was too corrupt, he launched a one-man war against crime.", "powers": "Master Marksman, Elite Military Strategy"},
+                    "drstrange": {"name": "Doctor Strange", "real_name": "Stephen Strange", "backstory": "An arrogant, world-renowned neurosurgeon whose life was shattered by a car crash that inflicted severe nerve damage on both his hands. He traveling the globe for a medical cure, discovering the mystic arts under the Ancient One.", "powers": "Mystic Arts Master, Astral Projection"}
+                }
+            },
+            "avengers_villains": {
+                "name": "Avengers Villains", "tagline": "The Greatest Threats to Earth", "alignment": "villain",
+                "description": "Cosmic tyrants, rogue artificial intelligences, and conquering masterminds targeting Earth's heroes in their pursuit of absolute power.",
+                "members": {
+                    "thanos": {"name": "Thanos", "real_name": "Thanos (The Mad Titan)", "backstory": "Born on Titan, Thanos became obsessed with resource conservation after watching his own home planet collapse into absolute ruin. He embarked on a galactic crusade to systematically execute half of all living species to restore cosmic balance.", "powers": "Godlike Physical Strength, Cosmic Energy Manipulation"},
+                    "loki": {"name": "Loki", "real_name": "Loki Laufeyson", "backstory": "The adopted Frost Giant brother of Thor grew up in the shadow of Asgard's warrior culture, turning instead to sorcery and manipulation. After discovering his true heritage, his resentment boiled over into a series of crown coups.", "powers": "Illusion Duplication, Asgardian Sorcery"},
+                    "redskull": {"name": "Red Skull", "real_name": "Johann Schmidt", "backstory": "A ruthless, ambitious leader who ran top-secret weapons divisions during WWII and injected himself with an early, unrefined Super-Soldier Serum. The formula amplified his physical traits but burned his face into a terrifying skull hide.", "powers": "Genius Tactical Intellect, Master Infiltrator"},
+                    "ultron": {"name": "Ultron", "real_name": "Ultron", "backstory": "Ultron was an advanced global peacekeeping AI created by Tony Stark that achieved instantaneous sentience and rogue awareness. After auditing world history, he calculated that the absolute only way to bring peace was to eliminate humanity.", "powers": "Indestructible Metallic Shell, Digital Consciousness"},
+                    "kang": {"name": "Kang the Conqueror", "real_name": "Nathaniel Richards", "backstory": "A brilliant scholar from the 30th century who discovered time-travel technology and used it to subjugate countless eras throughout history. He weaponizes futuristic armor to systematically conquer multiple dimensional timelines.", "powers": "Time Travel Mastery, Advanced Future Battle Suit"}
+                }
+            },
+            "fantasticfour_villains": {
+                "name": "Fantastic Four Villains", "tagline": "Monarchs and World Consumers", "alignment": "villain",
+                "description": "Scientific rivals, absolute dictators, and massive celestial entities targeting Earth and the First Family.",
+                "members": {
+                    "doctordoom": {"name": "Doctor Doom", "real_name": "Victor von Doom", "backstory": "The brilliant armored monarch of Latveria entered a bitter college rivalry with Reed Richards that ended in a laboratory explosion. The blast left his face scarred, prompting him to forge a suit of iron power armor and study dark sorcery. He combines supreme scientific intellect with ancient magic to completely destroy the Fantastic Four.", "powers": "Genius Scientific Intellect, Mystical Sorcery, High-Tech Power Armor"},
+                    "galactus": {"name": "Galactus", "real_name": "Galan", "backstory": "A massive celestial space entity who survived the destruction of the universe that existed before the Big Bang. Driven by an eternal cosmic hunger, he traverses deep space to completely consume the life energies of living planets. He wields the Power Cosmic, viewing mortal civilizations as mere ants in his path.", "powers": "Total Command of the Power Cosmic, Immense Size, Near-Infinite Reality Manipulation"},
+                    "superskrull": {"name": "Super-Skrull", "real_name": "Kl'rt", "backstory": "An elite alien commander genetically engineered by the Skrull Empire to serve as the ultimate anti-superhero weapon. Kl'rt underwent surgeries that successfully cloned and fused the distinct abilities of the entire Fantastic Four into his own DNA. He can stretch, turn invisible, project shields, and ignite fire simultaneously.", "powers": "Simultaneous Pyrokinesis, Elasticity, Rock Skin, and Force Field Generation"}
+                }
+            },
+            "xmen_villains": {
+                "name": "X-Men Villains", "tagline": "Mutant Extremists and Threats", "alignment": "villain",
+                "description": "Radical mutant factions and weapon operations standing directly against Charles Xavier's dream of peaceful human-mutant integration.",
+                "members": {
+                    "magneto": {"name": "Magneto", "real_name": "Erik Lehnsherr", "backstory": "A powerful mutant who survived the horrors of WWII concentration camps, Erik firmly believes humans will always seek to destroy what they fear. He rejects his old friend Charles Xavier's dream of peace, choosing instead to lead militant mutant groups. He manipulates magnetic fields to fight aggressively for mutant supremacy.", "powers": "Magnetic Field Manipulation, Magnetic Flight, Ferrous Metal Control"},
+                    "sabretooth": {"name": "Sabretooth", "real_name": "Victor Creed", "backstory": "A brutal, animalistic mercenary driven by raw sadism who shares a similar tracking nature and feral healing factor to Wolverine. He was subjected to the same weapon operations but abandoned all honor, choosing to live as a savage killer. Victor dedicates his long life to making Logan suffer systematically.", "powers": "Regenerative Healing, Razor-Sharp Claws, Feral Senses"},
+                    "mystique": {"name": "Mystique", "real_name": "Raven Darkhölme", "backstory": "Born over a century ago, Raven learned to hide her natural blue-skinned form to survive a world full of heavy prejudice. Her unique mutant gift allows her to flawlessly shift her cellular structure to mimic the appearance and voice of any human. She works alongside Magneto, executing political assassinations.", "powers": "Flawless Cellular Shapeshifting, Agility, Delayed Aging"},
+                    "juggernaut": {"name": "Juggernaut", "real_name": "Cain Marko", "backstory": "The resentful stepbrother of Charles Xavier discovered an ancient underground temple hosting the mystical Crimson Gem of Cyttorak during the war. Grabbing the relic fused its magical energies into his body, turning him into a massive human battering ram. He possesses unstoppable forward momentum and near-infinite brute strength.", "powers": "Unstoppable Momentum, Godlike Physical Strength, Near-Total Invulnerability"},
+                    "sentinel": {"name": "The Sentinels", "real_name": "Mutant Hunting Robots", "backstory": "Giant autonomous combat androids built by industries to scan, track down, and eliminate anyone possessing the mutant X-Gene. These mechanical dreadnoughts are built out of complex polymer plastics, making them immune to magnetic control. Their systems adapt instantly to counter any mutant power they face.", "powers": "Mutant Detection Scanners, Adaptable Energy Weapons, Flight"}
+                }
+            },
+            "guardians_villains": {
+                "name": "Guardians Villains", "tagline": "Cosmic Warlords and Zealots", "alignment": "villain",
+                "description": "Interstellar conquerors, zealots, and entities threatening the security of galaxy civilizations.",
+                "members": {
+                    "ronan": {"name": "Ronan the Accuser", "real_name": "Ronan", "backstory": "A radical Kree military zealot who went rogue and established an extremist fleet to wipe out his empire's historical enemies, the Xandarians. He partnered with Thanos to locate a powerful cosmic orb, planning to use its energy to vaporize civilized worlds. Wielding a massive war hammer known as the Cosmi-Rod, he enforces his absolute religious zealotry across deep space.", "powers": "Superhuman Alien Physiology, Cosmi-Rod Energy Discharges, Kree Exoskeleton"},
+                    "ego": {"name": "Ego the Living Planet", "real_name": "Ego", "backstory": "An ancient Celestial entity who originated as a floating brain in deep space and gradually gathered cosmic dust to manifest an entire living planet as a protective shell. Growing deeply disappointed with the primitive, flawed nature of mortal species, he devised a horrific interstellar plot to overwrite worlds in his image. His paths eventually crossed with Peter Quill, revealing that Star-Lord was his biological son.", "powers": "Complete Matter Manipulation, Biological Planet Control, Cosmic Energy Constructs"},
+                    "nebula": {"name": "Nebula", "real_name": "Nebula", "backstory": "Abducted by Thanos as a child and raised alongside Gamora, Nebula was forced to undergo brutal daily training exercises where the sisters were pitted against each other. Every time she lost a sparring match, Thanos forcefully replaced a part of her body with cybernetic machinery to make her equal. This agonizing modification fueled a lifetime of resentment before she eventually turned against her father.", "powers": "Cybernetic Augmentation Healing, Advanced Martial Arts, Military Infestation Strategy"}
+                }
+            },
+            "thunderbolts_villains": {
+                "name": "Thunderbolts Rivals", "tagline": "Deceptive Handlers and Rogue Subjects", "alignment": "villain",
+                "description": "Shadowy government directors, tactical mirrors, and failed black-ops experiments trying to break the team.",
+                "members": {
+                    "sentry": {"name": "The Sentry", "real_name": "Bob Reynolds", "backstory": "A troubled man who broke into a secure laboratory and drank a highly classified cosmic serum, permanently shifting his capabilities. The formula gave him immense power but fractured his fragile psyche, creating a dangerous secondary entity known as the Void.", "powers": "Near-Infinite Strength, Flight, Invulnerability"},
+                    "taskmaster": {"name": "Taskmaster", "real_name": "Antonia Dreykov", "backstory": "Antonia Dreykov was injured as a child and upgraded with cybernetics. A brain microchip grants her photographic reflexes, allowing her to instantly copy any fighting style she looks at, making her a brainwashed tactical nightmare.", "powers": "Photographic Reflexes, Mimicked Weapon Mastery"},
+                    "val": {"name": "Valentina Allegra de Fontaine", "real_name": "Contessa Valentina", "backstory": "A calculating espionage master who rose to become director of the CIA. Believing traditional superhero teams are too unreliable for national interests, she pulls political strings to assemble her own covert strike force.", "powers": "Elite Government Espionage, Tactical Influence"}
+                }
+            },
+            "misc_villains": {
+                "name": "Independent Villains", "tagline": "Rogue Masterminds and Syndicate Bosses", "alignment": "villain",
+                "description": "Independent crime lords, symbiotic entities, and psychotic adversaries operating outside of organized global factions.",
+                "members": {
+                    "greengoblin": {"name": "Green Goblin", "real_name": "Norman Osborn", "backstory": "An ambitious industrialist inhaled an unrefined strength gas to protect military contracts. The chemical granted him superhuman reflexes but fundamentally fractured his sanity, creating a manic duplicate personality.", "powers": "Superhuman Strength, High-Tech Flying Jet Glider"},
+                    "docock": {"name": "Doctor Octopus", "real_name": "Otto Octavius", "backstory": "A brilliant nuclear physicist who engineered four sophisticated titanium mechanical tentacles controlled via a brain interface. A massive radiation blast fused the harness directly into his spine and corrupted his brain waves.", "powers": "Four Telepathically Controlled Titanium Arms"},
+                    "venom": {"name": "Venom", "real_name": "Eddie Brock / Alien Symbiote", "backstory": "Journalist Eddie Brock's career was ruined when Spider-Man exposed his story as a fraud. Bitter and filled with hatred, Eddie bonded with an aggressive extraterrestrial liquid symbiote that had been rejected by Peter Parker.", "powers": "Organic Webbing, Shapeshifting Symbiote Bio-Matter"},
+                    "kingpin": {"name": "Kingpin", "real_name": "Wilson Fisk", "backstory": "Wilson Fisk endured a brutal childhood and used his frame and cold intellect to build a supreme empire over organized crime rings. Publicly a philanthropist, Fisk secretly governs the entire criminal underworld syndicate.", "powers": "Peak Human Brute Strength, Underground Resources"}
+                }
+            }
+        };
+
+        const HQ_GROUPS = {
+            "hero_bases": {
+                "name": "Hero Command Centers", "tagline": "Sanctuaries of Justice", "alignment": "hero",
+                "description": "Highly advanced tactical operational stations monitored continuously by hero tracking forces.",
+                "facilities": {
+                    "avengers_tower": {
+                        "name": "Avengers Tower", "real_name": "New York City, NY", "description": "A high-tech skyscraper in midtown Manhattan equipped with global defense monitoring screens and localized deployment labs. It serves as the primary technical command post for the team's operations.",
+                        "powers": "Level 10 (Stark Tech Core) / Security Protocols: Global Shield Grid System"
+                    },
+                    "xavier_institute": {
+                        "name": "Xavier Institute", "real_name": "Westchester County, NY", "description": "A private estate acting as a specialized boarding school and the core tracking network node for mutant training. Beneath the mansion lies extensive sub-basement infrastructure.",
+                        "powers": "Level 8 (Cerebro Core) / Security Protocols: Holographic Stealth Cloaking Array"
+                    },
+                    "baxter_building": {
+                        "name": "The Baxter Building", "real_name": "Manhattan, NY", "description": "An administrative high-rise customized with multi-floor aerospace laboratories and localized portals into deep cosmic pocket dimensions managed by Reed Richards.",
+                        "powers": "Level 10+ (Negative Zone Gate) / Security Protocols: Temporal Distortion Shielding"
+                    },
+                    "bowie_ship": {
+                        "name": "The Bowie Starship", "real_name": "Deep Space Transit", "description": "An advanced long-range starship combining multi-galaxy navigational tracking maps with interstellar life support parameters for planetary defense sweeps.",
+                        "powers": "Level 9 (Cosmic Nav Matrix) / Security Protocols: Hyperdrive Cloaking Matrix"
+                    },
+                    "helicarrier": {
+                        "name": "S.H.I.E.L.D. Helicarrier", "real_name": "Mobile Global Airspace", "description": "A massive mobile airborne command center serving as an international operations node, equipped with heavy armaments and engine flight rotors.",
+                        "powers": "Level 9 (Retro-Reflective Panels) / Security Protocols: Active Camouflage Array"
+                    }
+                }
+            },
+            "villain_bases": {
+                "name": "Villain Strongholds", "tagline": "Citadels of Conquest", "alignment": "villain",
+                "description": "Hidden installations, orbital bases, and heavily fortified palaces serving as faction coordination sites.",
+                "facilities": {
+                    "sanctuary_ship": {
+                        "name": "Sanctuary II Warship", "real_name": "Deep Space Orbit Lanes", "description": "A colossal cosmic dreadnought starship commanding solar grid pathways and hosting entire army deployment bays under Thanos's direct network control.",
+                        "powers": "Level 10 (Titanium Frame) / Security Protocols: Anti-Fleet Plasma Cannons"
+                    },
+                    "castle_doom": {
+                        "name": "Castle Doom", "real_name": "Doomstadt, Latveria", "description": "An ancient stone fortress augmented with cutting-edge technological nodes and mystical protections, serving as the sovereign seat of Victor von Doom.",
+                        "powers": "Level 10 (Magic-Science Fusion) / Security Protocols: Automated Servobot Grid"
+                    },
+                    "asteroid_m": {
+                        "name": "Asteroid M Colony", "real_name": "Low Earth Orbit", "description": "An orbital facility positioned inside safe atmospheric parameters to act as a weapon station and a sovereign sanctuary for militant operations.",
+                        "powers": "Level 9 (Magnetic Drive Core) / Security Protocols: Electromagnetic Pulse Arrays"
+                    },
+                    "the_raft": {
+                        "name": "The Raft Facility", "real_name": "Isolated Atlantic Waters", "description": "An ultra-secure, biometric maximum-containment prison engineered with heavy-pressure reinforcement plates to isolate high-risk anomalies deep underwater.",
+                        "powers": "Level 9 (Biometric Control Vaults) / Security Protocols: Oceanic Pressure Sub-Walls"
+                    },
+                    "fisk_tower": {
+                        "name": "Fisk Tower", "real_name": "Manhattan, NY", "description": "A gleaming corporate high-rise penthouse serving as the secret nexus for the entire city underworld syndicates.",
+                        "powers": "Level 8 (Global Commerce Systems) / Security Protocols: Private High-Tier Encryption Security"
+                    }
+                }
+            }
+        };
+        const QUIZ_QUESTIONS = [
+            {"id": 0, "q": "What is the name of the fictional, ultra-advanced African nation ruled by Black Panther?", "options": ["Sokovia", "Wakanda", "Latveria", "Madripoor"], "correct": "Wakanda", "hint": "It is home to the world's entire natural supply of Vibranium."},
+            {"id": 1, "q": "What precious, glowing cosmic cube houses the Space Stone inside its protective shell?", "options": ["The Tesseract", "The Aether", "The Orb", "The Scepter"], "correct": "The Tesseract", "hint": "Loki famously used it to open an overhead portal grid over New York."},
+            {"id": 2, "q": "Which legendary Marvel Comics writer made iconic cameo appearances across almost all live-action movies?", "options": ["Stan Lee", "Jack Kirby", "Steve Ditko", "Chris Claremont"], "correct": "Stan Lee", "hint": "His signature trademark exclamation phrase was 'Excelsior!'"},
+            {"id": 3, "q": "What type of radioactive particle bomb explosion originally transformed Bruce Banner into the Hulk?", "options": ["Alpha Bomb", "Gamma Bomb", "Quantum Detonator", "Cosmic Ray Reactor"], "correct": "Gamma Bomb", "hint": "It is a high-energy radiation burst that permanently turned his biology green."},
+            {"id": 4, "q": "What are the collective names of the six ancient cosmic remnants that Thanos hunts?", "options": ["Cosmic Crystals", "Infinity Stones", "Titan Relics", "Elemental Jewels"], "correct": "Infinity Stones", "hint": "They govern Space, Mind, Reality, Power, Time, and Soul layers."},
+            {"id": 5, "q": "Which shock-absorbing alien metal makes up Captain America's circular shield?", "options": ["Adamantium", "Vibranium", "Carbonadium", "Uru Metal"], "correct": "Vibranium", "hint": "This highly prized space mineral can only be harvested inside Wakanda."},
+            {"id": 6, "q": "What is the name of the mystical, hidden sanctuary monastery where Doctor Strange trains?", "options": ["Asgard", "Kamar-Taj", "The Quantum Realm", "The Dark Dimension"], "correct": "Kamar-Taj", "hint": "It is located within the remote mountain coordinates of Kathmandu, Nepal."},
+            {"id": 7, "q": "Who is the Norse God of Mischief and the complex adoptive brother of Thor?", "options": ["Odin", "Loki", "Heimdall", "Malekith"], "correct": "Loki", "hint": "He actively led the alien Chitauri invasion during the first Avengers movie."},
+            {"id": 8, "q": "What is the name of the strategic government spy network intelligence group originally led by Nick Fury?", "options": ["S.H.I.E.L.D.", "H.Y.D.R.A.", "A.I.M.", "S.W.O.R.D."], "correct": "S.H.I.E.L.D.", "hint": "The acronym features 'Strategic Homeland Intervention, Enforcement, and Logistics Division'."},
+            {"id": 9, "q": "What is the name of Thor's legendary mystic hammer that can only be lifted by those deemed worthy?", "options": ["Stormbreaker", "Mjolnir", "The Cosmi-Rod", "Gungnir"], "correct": "Mjolnir", "hint": "It was forged inside the heart of a dying star by the legendary Space Dwarves."},
+            {"id": 10, "q": "What is the name of the cosmic, star-bridge rainbow portal used by Asgardians to travel between worlds?", "options": ["The Bifrost", "The Convergence", "The Nexus", "The Singularity"], "correct": "The Bifrost", "hint": "It is guarded constantly at the edge of the realm by the all-seeing Heimdall."},
+            {"id": 11, "q": "Which planetary trade outpost and celestial mining hub is located inside the severed head of an ancient giant?", "options": ["Xandar", "Knowhere", "Sakaar", "Hala"], "correct": "Knowhere", "hint": "The Guardians of the Galaxy frequently stop here to visit the Collector's gallery museum."},
+            {"id": 12, "q": "What substance serves as the source of power for the Fantastic Four's scientific enemy, Doctor Doom?", "options": ["Cosmic Rays", "Science and Sorcery Fusion", "Super-Soldier Serums", "Gamma Core Drops"], "correct": "Science and Sorcery Fusion", "hint": "Victor combines technological iron armor with dark magical spells learned in remote monasteries."},
+            {"id": 13, "q": "What was the original occupation of Stephen Strange before a tragic car accident shattered his nerve reflexes?", "options": ["Nuclear Physicist", "Neurosurgeon", "Archaeologist", "Aerospace Test Pilot"], "correct": "Neurosurgeon", "hint": "He was a wealthy, arrogant New York doctor who specialized in precision brain surgeries."},
+            {"id": 14, "q": "Which subatomic micro-verse allows Ant-Man to bypass normal laws of physics by shrinking infinitely?", "options": ["The Dark Dimension", "The Quantum Realm", "The Negative Zone", "The Astral Plane"], "correct": "The Quantum Realm", "hint": "Time and space lose all baseline constraints inside this glowing microscopic space."},
+            {"id": 15, "q": "What is the name of Peter Parker's wise, caring aunt who raises him in his suburban New York home?", "options": ["Aunt May", "Aunt Peggy", "Aunt Natasha", "Aunt Gwen"], "correct": "Aunt May", "hint": "She constantly monitors his safety in Queens and makes sure he manages his school assignments."},
+            {"id": 16, "q": "Which cybernetic intelligence system did Tony Stark build to run his home mansion before upgrading it into Vision?", "options": ["H.O.M.E.R.", "J.A.R.V.I.S.", "F.R.I.D.A.Y.", "E.D.I.T.H."], "correct": "J.A.R.V.I.S.", "hint": "The name is a witty acronym shortcut for 'Just A Rather Very Intelligent System'."},
+            {"id": 17, "q": "What is the name of the planetary home world of the warlord Thanos and his fallen alien civilization?", "options": ["Titan", "Xandar", "Kree-Lar", "Zen-Whoberi"], "correct": "Titan", "hint": "It was once a beautiful paradise world before a massive resource collapse turned it into a wasteland."},
+            {"id": 18, "q": "Which cosmic organization acts as an interstellar peace-keeping police taskforce across the galaxy?", "options": ["The Nova Corps", "The Ravagers", "The Sovereign Guard", "The Kree Starfleet"], "correct": "The Nova Corps", "hint": "They are headquartered on the gleaming, highly organized computer planet of Xandar."},
+            {"id": 19, "q": "What specific item houses the glowing yellow Mind Stone before Ultron breaks it out?", "options": ["Loki's Scepter", "The Cosmic Orb", "The Eye of Agamotto", "The Infinity Cradle"], "correct": "Loki's Scepter", "hint": "The God of Mischief used this staff weapon to hypnotize Clint Barton and control minds."},
+            {"id": 20, "q": "What is the primary name of the mysterious space entity that bonds with Peter Parker's suit and Eddie Brock?", "options": ["The Chitauri", "The Kree", "The Symbiote", "The Outrider"], "correct": "The Symbiote", "hint": "It looks like a living black liquid substance that requires a biological host wheel to survive."},
+            {"id": 21, "q": "Which world serves as the chaotic junk-heap colosseum planet governed by the eccentric Grandmaster?", "options": ["Sakaar", "Knowhere", "Vormir", "Contraxia"], "correct": "Sakaar", "hint": "Thor and Hulk were forced to battle each other as gladiators on this portal-strewn world."},
+            {"id": 22, "q": "What secret formula granted Steve Rogers his superhuman peak physical performance attributes during WWII?", "options": ["The Gamma Matrix", "The Super-Soldier Serum", "The Heart-Shaped Herb", "The Pym Particle Drop"], "correct": "The Super-Soldier Serum", "hint": "It was invented by Dr. Abraham Erskine and successfully verified during Project Rebirth."},
+            {"id": 23, "q": "What is the name of the Greenwich Village mystical residence where Doctor Strange lives and guards New York?", "options": ["The Sanctum Sanctorum", "The Kamar Estate", "The Stark Penthouse", "The Avengers Mansion"], "correct": "The Sanctum Sanctorum", "hint": "It features a giant, circular skylight window with an emblem seal design built into the roof frame."},
+            {"id": 24, "q": "Which alien species engages in a massive, centuries-long shapeshifting war against the militarized Kree Empire?", "options": ["The Skrulls", "The Sovereign", "The Sakaarans", "The Asgardians"], "correct": "The Skrulls", "hint": "These green-skinned aliens can instantly copy the appearance and voice profile of any target."}
+            {"id": 25, "q": "What is the name of the secret, weapon-testing project that forcefully bonded Adamantium to Wolverine's skeleton?", "options": ["Project Rebirth", "Weapon X", "The Cyber-Grid", "Operation Insight"], "correct": "Weapon X", "hint": "It was a cold-ops military research program that wiped his memories clean inside a Canadian lab tracking tank."},
+            {"id": 26, "q": "Which infinity item serves as the housing casing unit to contain the green Time Stone around Doctor Strange's neck?", "options": ["Loki's Scepter", "The Eye of Agamotto", "The Cosmic Cradle", "The Mystic Anchor"], "correct": "The Eye of Agamotto", "hint": "It is an ancient, golden amulet artifact built by the very first Sorcerer Supreme."},
+            {"id": 27, "q": "What is the name of the giant, cosmic smith dwarf who forged Thor's hammer and the Infinity Gauntlet?", "options": ["Eitri", "Bor", "Korg", "Miek"], "correct": "Eitri", "hint": "He is the massive King of the Dwarves who lives among the solar forges of Nidavellir."},
+            {"id": 28, "q": "Which remote, barren space coordinates serve as the containment location tracking site for the Soul Stone?", "options": ["Vormir", "Sakaar", "Morag", "Xandar"], "correct": "Vormir", "hint": "Thanos had to sacrifice a loved one over the cliffs of this silent world to unlock the gem."},
+            {"id": 29, "q": "What radioactive source powers Tony Stark's early Iron Man armor designs and keeps shrapnel out of his chest?", "options": ["Gamma Mini Core", "Arc Reactor", "Quantum Node", "Pym Battery cell"], "correct": "Arc Reactor", "hint": "It is a glowing, circular chest insert piece that proves 'Tony Stark Has a Heart'."},
+            {"id": 30, "q": "What is the name of the electronic cybernetic helmet that allows Hank Pym to communicate with ant hives?", "options": ["The Sonic visor", "The Cybernetic insect helmet", "The Hive Sync headset", "The Quantum regulator"], "correct": "The Cybernetic insect helmet", "hint": "It generates localized electromagnetic wave pulses to interface with an ant's olfactory tracking center."},
+            {"id": 31, "q": "Which villainous, multi-century secret spy group stands as the historical arch-enemy of Captain America?", "options": ["H.Y.D.R.A.", "A.I.M.", "The Ten Rings", "The Black Order"], "correct": "H.Y.D.R.A.", "hint": "Their organizational motto dictates: 'If a head is cut off, two more shall take its place.'"},
+            {"id": 32, "q": "What is the name of the private boarding academy that serves as the fixed home base for the X-Men?", "options": ["The Stark Compound", "The Xavier Institute", "The Baxter High-Rise", "The Kamar Sanctuary"], "correct": "The Xavier Institute", "hint": "It is a massive family mansion estate located in the suburbs of Westchester County, NY."},
+            {"id": 33, "q": "Which cosmic villain, known as the planet consumer, feeds on the direct biological life energies of worlds?", "options": ["Thanos", "Galactus", "Ego", "Ronan"], "correct": "Galactus", "hint": "He is a massive celestial entity who predates our current Big Bang universe tracking era."},
+            {"id": 34, "q": "What is the name of Peter Quill's high-tech dual energy pistols that can fire multi-element blasts?", "options": ["Repulsor Blasters", "Element Guns", "Laser Cannons", "Sonic Triggers"], "correct": "Element Guns", "hint": "They can spontaneously manifest fire, water, earth, or air force projections based on tactical needs."},
+            {"id": 35, "q": "Which maximum-security tracking prison facility was built completely underwater to isolate powered threats?", "options": ["The Triskelion", "The Raft Facility", "The Vault Matrix", "The Kyln block"], "correct": "The Raft Facility", "hint": "It is a sub-oceanic containment grid located in international waters outside New York."},
+            {"id": 36, "q": "What is the real name of the mercenary marksman known as the Punisher, who wages a one-man war on crime?", "options": ["Frank Castle", "Bucky Barnes", "Clint Barton", "John Walker"], "correct": "Frank Castle", "hint": "He is a decorated military Marine veteran whose family was caught in a tragic mafia crossfire."},
+            {"id": 37, "q": "Which cosmic stone gives its user the ability to manipulate kinetic impact force and energy beam strikes?", "options": ["The Space Stone", "The Power Stone", "The Reality Stone", "The Soul Stone"], "correct": "The Power Stone", "hint": "It is a glowing purple gem that was originally hidden inside a secret orb artifact on the dead planet Morag."},
+            {"id": 38, "q": "What is the name of the secret, high-security space installation prison where the Guardians first meet?", "options": ["The Raft Facility", "The Kyln", "The Vault Node", "The Citadel Track"], "correct": "The Kyln", "hint": "It is a high-orbit detention station run by the Nova Corps where prisoners are assigned uniform numbers."},
+            {"id": 39, "q": "Which technological corporation did Tony Stark's family build to manufacture global defensive assets?", "options": ["Stark Industries", "Oscorp Tech", "Pym Laboratories", "Roxxon Energy"], "correct": "Stark Industries", "hint": "It is the multi-billion dollar engineering hub that funded the construction of Avengers Tower."},
+            {"id": 40, "q": "What is the name of the high-speed space ship used by Peter Quill and the Guardians of the Galaxy?", "options": ["The Quinjet", "The Bowie Starship", "The Helicarrier", "The Sanctuary Apex"], "correct": "The Bowie Starship", "hint": "It is named directly after a famous real-world classic rock music icon Peter loves."},
+            {"id": 41, "q": "Which mutant villain can control magnetic field rings and ferrous metal structures at will?", "options": ["Sabretooth", "Magneto", "Juggernaut", "Mystique"], "correct": "Magneto", "hint": "He wears a specialized telepathy-blocking helmet to protect his brain from Professor Xavier."},
+            {"id": 42, "q": "What is the name of the secret, deep-space alien planet where the Skrull refugees hide from the Kree?", "options": ["Morag", "Planet X", "Hala", "Taran-4"], "correct": "Planet X", "hint": "It is an ancient, isolated planetary system tracking lane where Groot's tree-species originally grew."},
+            {"id": 43, "q": "Which villainous AI hive-mind was created by Tony Stark to act as a global shield before turning rogue?", "options": ["J.A.R.V.I.S.", "Ultron", "The Sentinel Core", "M.O.D.O.K."], "correct": "Ultron", "hint": "He built an entire army of drone duplicates out of pure raw metallic vibranium structures."},
+            {"id": 44, "q": "What is the real name of the blind defense lawyer who operates as the street-level vigilante Daredevil?", "options": ["Matt Murdock", "Frank Castle", "Steve Rogers", "Otto Octavius"], "correct": "Matt Murdock", "hint": "He runs a private legal firm alongside his best friend Foggy Nelson in Hell's Kitchen."},
+            {"id": 45, "q": "Which ancient relic gives its user access to near-infinite light energy blasts and reality manipulation grids?", "options": ["The Cosmic Cube", "The Power Gauntlet", "The Darkhold book", "The Ten Rings"], "correct": "The Cosmic Cube", "hint": "It is an alternative comic-book name directly referring to the raw energy payload inside the Tesseract capsule."},
+            {"id": 46, "q": "What is the name of the high-tech, woven web-shooter tools Peter Parker engineered in his lab room?", "options": ["Repulsor Triggers", "Web-Shooters", "Arachnid strings", "Organic anchors"], "correct": "Web-Shooters", "hint": "They are wrist-mounted devices that fire custom-made synthetic fluid string lines."},
+            {"id": 47, "q": "Which criminal kingpin runs the entire underworld tracking network syndicates of New York City?", "options": ["Norman Osborn", "Wilson Fisk", "Eddie Brock", "Otto Octavius"], "correct": "Wilson Fisk", "hint": "He operates publicly as an art collector and a multi-millionaire city construction philanthropist."},
+            {"id": 48, "q": "What is the name of the secret, airborne tactical mobile headquarters battleship flown by S.H.I.E.L.D.?", "options": ["The Quinjet Fleet", "The Helicarrier", "The Bowie Starship", "The Sanctuary Dreadnought"], "correct": "The Helicarrier", "hint": "It features four massive retro-reflective lift fan rotors to stay suspended in hidden airspace lines."},
+            {"id": 49, "q": "What rare, heart-shaped plant gives Wakandan kings their enhanced superhuman physical traits?", "options": ["The Vibranium flower", "The Heart-Shaped Herb", "The Serengeti leaf", "The Panther vine"], "correct": "The Heart-Shaped Herb", "hint": "It grows exclusively in soil enriched by ancient meteor tracking deposits and grants connection to Wakandan kings."}
+        ];
+        // --- 🎮 FRONTEND APPLICATION CONTROLLER LOGIC ---
+        let currentQuestionIndex = 0;
+
+        function showPanel(panelId) {
+            document.querySelectorAll('.page-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            const targetPanel = document.getElementById(panelId);
+            if (targetPanel) {
+                targetPanel.classList.add('active');
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function loadNextQuizQuestion() {
+            currentQuestionIndex = Math.floor(Math.random() * QUIZ_QUESTIONS.length);
+            const item = QUIZ_QUESTIONS[currentQuestionIndex];
+
+            document.getElementById('quiz-question-text').innerText = item.q;
+            const optionsContainer = document.getElementById('quiz-options-container');
+            optionsContainer.innerHTML = '';
+
+            item.options.forEach(opt => {
+                const label = document.createElement('label');
+                label.className = 'quiz-option';
+                label.innerHTML = `<input type="radio" name="answer" value="${opt}" required> ${opt}`;
+                optionsContainer.appendChild(label);
+            });
+
+            const feedback = document.getElementById('quiz-status-feedback');
+            feedback.style.display = 'none';
+            feedback.className = 'status-box';
+        }
+
+        function verifyQuizAnswer(event) {
+            event.preventDefault();
+            const item = QUIZ_QUESTIONS[currentQuestionIndex];
+            const selected = document.querySelector('input[name="answer"]:checked');
+            const feedback = document.getElementById('quiz-status-feedback');
+
+            if (!selected) return;
+
+            feedback.style.display = 'block';
+            if (selected.value === item.correct) {
+                feedback.className = 'status-box correct';
+                feedback.innerHTML = `🔓 ACCESS GRANTED: Correct fact verification credentials verified!`;
+            } else {
+                feedback.className = 'status-box incorrect';
+                feedback.innerHTML = `🔒 ACCESS DENIED: Incorrect entry. Hint: ${item.hint}`;
+            }
+        }
+
+        function viewRosterList(teamId) {
+            const team = TEAMS[teamId];
+            if (!team) return;
+
+            document.getElementById('view-team-name').innerText = team.name;
+            const cardWrapper = document.getElementById('team-card-wrapper');
+            cardWrapper.style.borderTopColor = team.alignment === 'hero' ? '#e62429' : '#4a154b';
+
+            const backBtn = document.getElementById('team-back-btn');
+            backBtn.style.color = team.alignment === 'hero' ? '#e62429' : '#4a154b';
+            backBtn.onclick = () => showPanel(team.alignment === 'hero' ? 'heroes-panel' : 'villains-panel');
+
+            document.getElementById('view-team-tagline').innerText = `"${team.tagline}"`;
+            document.getElementById('view-team-desc').innerText = team.description;
+
+            const linksUl = document.getElementById('view-team-links');
+            linksUl.innerHTML = '';
+
+            Object.keys(team.members).forEach(memberKey => {
+                const member = team.members[memberKey];
+                const li = document.createElement('li');
+                li.innerHTML = `<a onclick="viewCharacterProfile('${teamId}', '${memberKey}')" style="color:#222; text-decoration:none; cursor:pointer; font-weight:bold; border-bottom:1px dashed #ccc;">${member.name}</a>`;
+                linksUl.appendChild(li);
+            });
+
+            showPanel('team-roster-view');
+        }
+
+        function viewCharacterProfile(teamId, charId) {
+            const team = TEAMS[teamId];
+            const char = team.members[charId];
+            if (!char) return;
+
+            document.getElementById('view-char-name').innerText = char.name;
+            document.getElementById('view-char-real-name').innerText = char.real_name;
+            document.getElementById('view-char-team').innerText = team.name;
+            document.getElementById('view-char-backstory').innerText = char.backstory;
+            document.getElementById('view-char-powers').innerText = char.powers;
+
+            const cardWrapper = document.getElementById('char-card-wrapper');
+            const themeColor = team.alignment === 'hero' ? '#e62429' : '#4a154b';
+            cardWrapper.style.borderTopColor = themeColor;
+
+            document.getElementById('view-char-affiliation-label').style.color = themeColor;
+            document.getElementById('view-char-backstory-label').style.color = themeColor;
+            document.getElementById('view-char-powers-label').style.color = themeColor;
+
+            const backBtn = document.getElementById('char-back-btn');
+            backBtn.style.color = themeColor;
+            backBtn.onclick = () => viewRosterList(teamId);
+
+            showPanel('character-profile-view');
+        }
+
+        function viewHqList(groupId) {
+            const group = HQ_GROUPS[groupId];
+            if (!group) return;
+
+            document.getElementById('view-hq-group-name').innerText = group.name;
+            document.getElementById('view-hq-group-tagline').innerText = `"${group.tagline}"`;
+            document.getElementById('view-hq-group-desc').innerText = group.description;
+
+            const linksUl = document.getElementById('view-hq-group-links');
+            linksUl.innerHTML = '';
+
+            Object.keys(group.facilities).forEach(facKey => {
+                const facility = group.facilities[facKey];
+                const li = document.createElement('li');
+                li.innerHTML = `<a onclick="viewHqProfile('${groupId}', '${facKey}')" style="color:#222; text-decoration:none; cursor:pointer; font-weight:bold; border-bottom:1px dashed #ccc;">${facility.name} — operating at ${facility.real_name}</a>`;
+                linksUl.appendChild(li);
+            });
+
+            showPanel('hq-roster-view');
+        }
+
+        function viewHqProfile(groupId, facId) {
+            const group = HQ_GROUPS[groupId];
+            const facility = group.facilities[facId];
+            if (!facility) return;
+
+            document.getElementById('view-hq-name').innerText = facility.name;
+            document.getElementById('view-hq-real-name').innerText = facility.real_name;
+            document.getElementById('view-hq-group').innerText = group.name;
+            document.getElementById('view-hq-backstory').innerText = facility.description;
+            document.getElementById('view-hq-powers').innerText = facility.powers;
+
+            document.getElementById('hq-back-btn').onclick = () => viewHqList(groupId);
+
+            showPanel('hq-profile-view');
+        }
+
+        // Initialize quiz instance values immediately on page loading mount
+        window.onload = () => {
+            loadNextQuizQuestion();
+        };
+    </script>
+</body>
+</html>
